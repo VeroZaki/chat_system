@@ -24,15 +24,25 @@ module Api
         @application.token = Digest::SHA1.hexdigest([Time.now, rand].join)
         @application.chats_count = 0
         if @application.save
-            render json: {status: :created, error: '', data: {token: @application.token}}, status: :created
+          render json: {status: :created, error: '', data: {token: @application.token}}, status: :created
         else
-            render json: {status: :unprocessable_entity, error: @application.errors, data: []}, status: :unprocessable_entity
+          render json: {status: :unprocessable_entity, error: @application.errors, data: []}, status: :unprocessable_entity
         end
       end
 
       def destroy
         @application = Applications.find(params[:id])
         @application.destroy
+      end
+
+      # PATCH/PUT /applications/1 or /applications/1.json
+      def update
+        @application = Applications.find(params[:id])
+        if @application.update(application_params)
+          render json: {status: :ok, error: '', data: {token: @application.token}}, status: :ok
+        else
+          render json: {status: :unprocessable_entity, error: @application.errors, data: []}, status: :unprocessable_entity
+        end
       end
     end
   end
