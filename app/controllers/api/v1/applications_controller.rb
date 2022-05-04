@@ -1,8 +1,6 @@
 module Api
   module V1
     class ApplicationsController < ApplicationController
-      before_action :set_application, only: [:show, :update, :destroy]
-      ALLOWED_DATA = %[name].freeze
 
       # GET /applications or /applications.json
       def index
@@ -11,11 +9,20 @@ module Api
       end
 
       def show
-        @application = Applications.find(params[:id])
+        @application = Applications.find_by(token: params[:id])
         if @application
           render json:  @application
         else
-          render json: {"error": "Not found"}
+          render json: {"error": "This Application not found"}
+        end
+      end
+
+      def show_by_id
+        @application = Applications.find_by(id: params[:id])
+        if @application
+          render json:  @application
+        else
+          render json: {"error": "This Application not found"}
         end
       end
 
@@ -24,24 +31,37 @@ module Api
         @application.token = Digest::SHA1.hexdigest([Time.now, rand].join)
         @application.chats_count = 0
         if @application.save
-          render json: {status: :created, error: '', data: {token: @application.token}}, status: :created
+          render json: {
+              response: "success",
+              chat: {
+                name: @application.name,
+                chats_count: @application.chats_count,
+                created_at: @application.created_at
+              }
+          }, status: 200
         else
           render json: {status: :unprocessable_entity, error: @application.errors, data: []}, status: :unprocessable_entity
         end
       end
 
       def destroy
-        @application = Applications.find(params[:id])
-        @application.destroy
+        @application = Applications.find_by(token: params[:id])
+        if @application
+          @application.destroy
+          render json: "Application Deleted successfuly"
+        else
+          render json: {status: :unprocessable_entity, error: "Application can't be deleted", data: []}, status: :unprocessable_entity
+        end
       end
 
       # PATCH/PUT /applications/1 or /applications/1.json
       def update
-        @application = Applications.find(params[:id])
-        if @application.update(application_params)
+        @application = Applications.find_by(token: params[:id])
+        if @application
+          @application.update(application_params)
           render json: {status: :ok, error: '', data: {token: @application.token}}, status: :ok
         else
-          render json: {status: :unprocessable_entity, error: @application.errors, data: []}, status: :unprocessable_entity
+          render json: {status: :unprocessable_entity, error: "Application can't be updated", data: []}, status: :unprocessable_entity
         end
       end
     end
