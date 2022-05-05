@@ -10,7 +10,6 @@ module Api
               @chats_array = Array.new
               @chats.each do |chat|
                 @chats_array << {
-                  id: chat.id,
                   chat_number: chat.number,
                   application_token: chat.application_id,
                   messages_count: chat.messages_count,
@@ -28,7 +27,6 @@ module Api
                 @chats_array = Array.new
                 @chats.each do |chat|
                   @chats_array << {
-                    id: chat.id,
                     chat_number: chat.number,
                     application_token: chat.application_id,
                     messages_count: chat.messages_count,
