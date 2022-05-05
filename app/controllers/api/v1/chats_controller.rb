@@ -1,6 +1,7 @@
 module Api
     module V1
         class ChatsController < ApplicationsController
+            before_action :set_application, only: [:create]
             def index
                 application_token = params.require(:application_id)
                 @chats = Chat.where(application_id: application_token)
@@ -9,6 +10,7 @@ module Api
                 @chats_array = Array.new
                 @chats.each do |chat|
                   @chats_array << {
+                    id: chat.id,
                     chat_number: chat.number,
                     application_token: chat.application_id,
                     messages_count: chat.messages_count,
@@ -19,14 +21,16 @@ module Api
             end
         
             def create
-                application_token = params.permit(:application_id)
+                number = @application.chats_count + 1
+                @application.update(chats_count: number)
 
-                @chat = Chat.new(application_token)
+                @chat = Chat.new(application_id: params[:application_id])
+                @chat.number = number
                 if @chat.save
                     render json: {
                         response: "success",
                         chat: {
-                            chat_number: @chat.number,
+                            chat_number: number,
                             application_id: @chat.application_id,
                             messages_count: @chat.messages_count,
                             created_at: @chat.created_at
@@ -38,7 +42,7 @@ module Api
             end
 
             def destroy
-                @chat = Chat.find_by(number: params[:id])
+                @chat = Chat.find_by(id: params[:id])
                 if @chat
                     @chat.destroy
                   render json: "Application Deleted successfuly"
@@ -53,10 +57,20 @@ end
 private
   # Use callbacks to share common setup or constraints between actions.
   def set_application
-    @application = Applications.find(params[:id])
+    @application = Applications.where(token: params[:application_id]).first
+    if !@application
+        render json: {status: :not_found, error: 'Application not found', data: []}, status: :not_found
+     end
   end
 
   # Only allow a list of trusted parameters through.
   def chat_params
     params.permit(:token)
+  end
+
+  def set_chat
+    @chat = @app.chats.where(number: params[:id]).first
+    if !@chat
+        render json: {status: :not_found, error: 'Chat not found', data: []}, status: :not_found
+    end
   end
