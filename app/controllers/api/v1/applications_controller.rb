@@ -5,16 +5,30 @@ module Api
       # GET /applications or /applications.json
       def index
         @application = Applications.all
-        render json:  @application
+        return render json: {message: "No Applications found. Create one."} unless @application
+        @applications_array = Array.new
+        @application.each do |app|
+          @applications_array << {
+            application_token: app.token,
+            chats_count: app.chats_count,
+            created_at: app.created_at
+          }
+        end
+        render json: @applications_array, status: 200
       end
 
       def show
-        @application = Applications.find_by(token: params[:id])
-        if @application
-          render json:  @application
-        else
-          render json: {"error": "This Application not found"}
+        @application = Applications.where(token: params[:id])
+        return render json: {message: "No Applications found. Create one."} unless @application
+        @applications_array = Array.new
+        @application.each do |app|
+          @applications_array << {
+            application_token: app.token,
+            chats_count: app.chats_count,
+            created_at: app.created_at
+          }
         end
+        render json: @applications_array, status: 200
       end
 
       def show_by_id
@@ -35,6 +49,7 @@ module Api
               response: "success",
               chat: {
                 name: @application.name,
+                application_token: @application.token,
                 chats_count: @application.chats_count,
                 created_at: @application.created_at
               }

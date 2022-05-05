@@ -78,7 +78,6 @@ module Api
           render json: {status: :unprocessable_entity, error: "Message can't be updated", data: []}, status: :unprocessable_entity
         end
       end
-
     end
   end
 end
