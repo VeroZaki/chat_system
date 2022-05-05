@@ -30,3 +30,11 @@ Note: When the app launched it will be run on [localhost:3001] and Database on p
 ```
 docker-compose run --rm app "Command"
 ```
+
+# Database Diagram
+## Entites Relation Diagram by Chen's
+![alt text](https://github.com/VeroZaki/chat_system/blob/main/Pictures/Chat%20System%20ERD.png)
+Chen's database notition made on Microsoft Visio.
+## Entites Relation Diagram by Crow's Foot
+![alt text](https://github.com/VeroZaki/chat_system/blob/main/Diagrams/Entites%20relation%20diagram.png)
+Crow's Foot database notition made on Microsoft Visio.
