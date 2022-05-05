@@ -1,10 +1,28 @@
 module Api
     module V1
         class ChatsController < ApplicationsController
-            before_action :set_application, only: [:create]
+            before_action :set_application, only: [:create, :destroy]
             def index
-                application_token = params.require(:application_id)
-                @chats = Chat.where(application_id: application_token)
+              application_token = params.require(:application_id)
+              @chats = Chat.where(application_id: application_token)
+
+              return render json: {message: "No chats found. Create one."} unless @chats
+              @chats_array = Array.new
+              @chats.each do |chat|
+                @chats_array << {
+                  id: chat.id,
+                  chat_number: chat.number,
+                  application_token: chat.application_id,
+                  messages_count: chat.messages_count,
+                  created_at: chat.created_at
+                }
+              end
+              render json: @chats_array, status: 200
+            end
+        
+            def show 
+              application_token = params.require(:application_id)
+                @chats = Chat.where(application_id: application_token, number: params[:id])
 
                 return render json: {message: "No chats found. Create one."} unless @chats
                 @chats_array = Array.new
@@ -17,9 +35,9 @@ module Api
                     created_at: chat.created_at
                   }
                 end
-                render json: @chats_array, status: 200
+              render json: @chats_array, status: 200
             end
-        
+
             def create
                 number = @application.chats_count + 1
                 @application.update(chats_count: number)
@@ -42,14 +60,17 @@ module Api
             end
 
             def destroy
-                @chat = Chat.find_by(id: params[:id])
+                @chat = Chat.find_by(number: params[:id])
                 if @chat
-                    @chat.destroy
-                  render json: "Application Deleted successfuly"
+                  @chat.destroy
+                  number = @application.chats_count - 1
+                  @application.update(chats_count: number)
+
+                  render json: "Chat Deleted successfuly"
                 else
-                  render json: {status: :unprocessable_entity, error: "Application can't be deleted", data: []}, status: :unprocessable_entity
+                  render json: {status: :unprocessable_entity, error: "Chat can't be deleted", data: []}, status: :unprocessable_entity
                 end
-              end
+            end
         end        
     end
 end    

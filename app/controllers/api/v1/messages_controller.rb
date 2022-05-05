@@ -1,21 +1,38 @@
 module Api
   module V1
     class MessagesController < ApplicationController
-      before_action :set_chat , only: [:create]
+      before_action :set_chat , only: [:create, :destroy]
       before_action :set_application, only: [:create]
       def index
-          chat_token = params.require(:chat_id)
-          @messages = Message.where(number: chat_token)
+        chat_token = params.require(:chat_id)
+        @messages = Message.where(chat_id: chat_token)
 
-          return render json: {message: "No Messaages found. Create one."} unless @messages
-          @messages_array = Array.new
-          @messages.each do |message|
-            @messages_array << {
-              message_number: message.number,
-              created_at: message.created_at
-            }
-          end
-          render json: @messages_array, status: 200
+        return render json: {message: "No Messaages found. Create one."} unless @messages
+        @messages_array = Array.new
+        @messages.each do |message|
+          @messages_array << {
+            message_number: message.number,
+            message_body: message.body,
+            created_at: message.created_at
+          }
+        end
+        render json: @messages_array, status: 200
+      end
+
+      def show 
+        chat_token = params.require(:chat_id)
+        @messages = Message.where(chat_id: chat_token, number: params[:id])
+
+        return render json: {message: "No Messaages found. Create one."} unless @messages
+        @messages_array = Array.new
+        @messages.each do |message|
+          @messages_array << {
+            message_number: message.number,
+            message_body: message.body,
+            created_at: message.created_at
+          }
+        end
+        render json: @messages_array, status: 200
       end
 
       def create
@@ -39,14 +56,28 @@ module Api
       end
 
       def destroy
-        @chat = Message.find_by(number: params[:id])
-        if @chat
-            @chat.destroy
+        @message = Message.find_by(number: params[:id])
+        if @message
+          @message.destroy
+          number = @chat.messages_count - 1
+          @chat.update(messages_count: number)
+
           render json: "Message Deleted successfuly"
         else
           render json: {status: :unprocessable_entity, error: "Message can't be deleted", data: []}, status: :unprocessable_entity
         end
       end    
+
+       # PATCH/PUT /applications/1 or /applications/1.json
+      def update
+        @message = Message.find_by(number: params[:id])
+        if @message
+          @message.update(message_params)
+          render json: {status: :ok, error: '', data: "Updated Successfuly"}, status: :ok
+        else
+          render json: {status: :unprocessable_entity, error: "Message can't be updated", data: []}, status: :unprocessable_entity
+        end
+      end
 
     end
   end
@@ -73,3 +104,7 @@ private
     params.permit(:token)
   end
 
+  # Only allow a list of trusted parameters through.
+  def message_params
+    params.permit(:body)
+  end
