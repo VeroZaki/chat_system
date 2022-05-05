@@ -5,11 +5,12 @@ Access Postman Publish Collection: https://documenter.getpostman.com/view/179055
 # How To Run 
 
 1. Download the zip folder and unzip it or clone the project
-<copy-button>https://github.com/VeroZaki/chat_system.git</copy-button>
+https://github.com/VeroZaki/chat_system.git
+```
 
 2. Run this command to install the packages nedded
-<copy-button>https://github.com/VeroZaki/chat_system.git</copy-button>
-
+https://github.com/VeroZaki/chat_system.git
+```
 # Run From Docker
 1. Build Docker Image
 <copy-button>docker-compose build</copy-button>
